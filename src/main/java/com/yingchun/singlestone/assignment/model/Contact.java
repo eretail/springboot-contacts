@@ -83,7 +83,6 @@ public class Contact implements Serializable{
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	Integer id;
-	@Embedded
 	@JsonProperty("name")
 	ContactName contactName;
 	/*@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -96,10 +95,10 @@ public class Contact implements Serializable{
             insertable = false,
             updatable = false
     )*/
-	@ElementCollection(targetClass = java.util.ArrayList.class, fetch = FetchType.EAGER)
+//	@ElementCollection(targetClass = java.util.ArrayList.class, fetch = FetchType.EAGER)
 	@JsonProperty("phone")
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "contact")
 	List<ContactPhone> contactPhones=new ArrayList<ContactPhone>();
-	@Embedded
 	@JsonProperty("address")
 	ContactAddress contactAdress;
 	@JsonProperty("email")

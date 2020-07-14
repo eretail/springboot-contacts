@@ -35,7 +35,8 @@ public class ContactPhone implements Serializable {
 	@JsonProperty("type")
 	private String type;
 	
-/*	@ManyToOne(fetch = FetchType.LAZY, targetEntity = Contact.class)
+//	@ManyToOne(fetch = FetchType.LAZY, targetEntity = Contact.class)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "id", insertable = false, updatable = false)
-	private Contact contact;*/
+	private Contact contact;
 }

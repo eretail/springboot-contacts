@@ -40,7 +40,6 @@ public class ContactController {
 	
 	@PostMapping(path = "/contacts", consumes = "application/json", produces = "application/json")
 	public Contact saveContact(@RequestBody Contact contact) {
-		
 		Optional<Contact> cont= Optional.empty();
 		
 		try {
