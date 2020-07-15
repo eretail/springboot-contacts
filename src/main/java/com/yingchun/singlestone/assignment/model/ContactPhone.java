@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -27,16 +28,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ContactPhone implements Serializable {
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)	
-	@Column(name = "phone_id")
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@JsonIgnore
 	private Integer phoneId;
+	@JsonIgnore
+	@Column(name = "contact_id")
+	private Integer contactId;
+
 	@JsonProperty("number")
 	private String number;
 	@JsonProperty("type")
 	private String type;
 	
 //	@ManyToOne(fetch = FetchType.LAZY, targetEntity = Contact.class)
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "id", insertable = false, updatable = false)
-	private Contact contact;
+//	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+//	@JoinColumn(name = "id", insertable = false, updatable = false)
+//	private Contact contact;
 }

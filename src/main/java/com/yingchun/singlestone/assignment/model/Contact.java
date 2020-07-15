@@ -85,8 +85,8 @@ public class Contact implements Serializable{
 	Integer id;
 	@JsonProperty("name")
 	ContactName contactName;
-	/*@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(
+	/*@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)*/
+    /*@JoinColumn(
             name = "phone_id",
             nullable = false,
             foreignKey = @ForeignKey(
@@ -97,10 +97,11 @@ public class Contact implements Serializable{
     )*/
 //	@ElementCollection(targetClass = java.util.ArrayList.class, fetch = FetchType.EAGER)
 	@JsonProperty("phone")
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "contact")
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@JoinColumn(name = "contact_id", insertable = false, updatable = false)
 	List<ContactPhone> contactPhones=new ArrayList<ContactPhone>();
 	@JsonProperty("address")
-	ContactAddress contactAdress;
+	ContactAddress contactAddress;
 	@JsonProperty("email")
 	String contactEmail;
 }

@@ -40,19 +40,13 @@ public class ContactController {
 	
 	@PostMapping(path = "/contacts", consumes = "application/json", produces = "application/json")
 	public Contact saveContact(@RequestBody Contact contact) {
-		Optional<Contact> cont= Optional.empty();
-		
-		try {
-				cont= contactService.addContact(contact);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		return cont.get();
+		return	contactService.addContact(contact);
 	}
 
 	@PutMapping(path ="/contacts/{id}", consumes = "application/json", produces = "application/json")
-	public Contact updateContact(@RequestBody Contact contact) {
-		return contactService.updateContact(contact);
+	public Contact updateContact(@RequestBody Contact contact, @PathVariable Integer id) {
+
+		return contactService.updateContact(contact, id);
 	}
 
 	@GetMapping(path = "/contacts/{id}", produces = "application/json")
@@ -64,5 +58,4 @@ public class ContactController {
 	public void deleteContactById(@PathVariable Integer id) {
 		 contactService.deleteContactById(id);
 	}
-	
 }
