@@ -36,7 +36,21 @@ run.bat
 ```
 ![image](https://user-images.githubusercontent.com/26700142/68820729-4dc80980-065a-11ea-9596-638d920ea910.png)
 
-# Usage
+# Running the Application
+To run the project:
+mvn spring-boot:run
+
+#Testing Via Postman
+Create Contact POST /contacts
+
+Update individual contacts PUT /contacts/{id}
+
+Get Contacts GET /contacts
+
+Get individual contacts GET /contacts/{id}
+
+Delete individual contacts DELETE /contacts/{id}
+
 
 # Current Status and Enhancement
 

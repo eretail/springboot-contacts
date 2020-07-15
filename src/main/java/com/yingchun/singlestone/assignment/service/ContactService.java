@@ -43,10 +43,12 @@ public class ContactService {
 		return contact;
 	}
 
-	public Contact updateContact(Contact contact, Integer id) {
+	public Optional<Contact> updateContact(Contact contact, Integer id) {
 		if(contactRepository.existsById(id))
 			contact.setId(id);
-
+		else 
+			return Optional.empty();
+		
 		try {
 			contact = contactRepository.save(contact);
 			Integer contactId = contact.getId();
@@ -59,7 +61,7 @@ public class ContactService {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		return contact;
+		return Optional.of(contact);
 	}
 
 	public Optional<Contact> getContactById(Integer id) {
@@ -68,6 +70,11 @@ public class ContactService {
 
 	public void deleteContactById(Integer id) {
 		contactRepository.deleteById(id);
+	}
+
+	public Optional findById(Integer contactId) {
+		
+		return contactRepository.findById(contactId);
 	}
 
 }
