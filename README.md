@@ -30,7 +30,7 @@ Update individual contacts PUT /contacts/{id}
 ![image](https://user-images.githubusercontent.com/26700142/87626193-c4da0400-c6f9-11ea-92dd-f4ff532779cb.png)
 
 Get Contacts GET /contacts
-![image](https://user-images.githubusercontent.com/26700142/87626316-13879e00-c6fa-11ea-81f2-a24ff3dfc104.png")
+![image](https://user-images.githubusercontent.com/26700142/87626316-13879e00-c6fa-11ea-81f2-a24ff3dfc104.png)
 
 Get individual contacts GET /contacts/{id}
 ![image](https://user-images.githubusercontent.com/26700142/87626089-96f4bf80-c6f9-11ea-90b0-a89bdd14d8f3.png)
