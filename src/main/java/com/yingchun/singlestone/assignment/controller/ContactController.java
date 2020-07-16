@@ -1,5 +1,6 @@
 package com.yingchun.singlestone.assignment.controller;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +18,10 @@ import com.yingchun.singlestone.assignment.exception.ResourceNotFoundException;
 import com.yingchun.singlestone.assignment.model.Contact;
 import com.yingchun.singlestone.assignment.service.ContactService;
 import com.yingchun.singlestone.assignment.util.ResponseUtil;
-/** 
+
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
+
+/**
  * 1.	Create a new REST API using Java/JVM technologies with the following endpoints:
  * HTTP Method	Route	Description
  * GET	/contacts	List all contacts
@@ -55,8 +59,10 @@ public class ContactController {
 	public ResponseEntity<Contact> updateContact(@RequestBody Contact contact, @PathVariable Integer contactId) throws Throwable {
 		Optional contactOptional = contactService.updateContact(contact, contactId);
  		return (ResponseEntity<Contact>) 
- 				contactOptional.map(c -> 
- 					ResponseEntity.created(ResponseUtil.resourceUri(contactId))
+ 				contactOptional.map(c ->
+					ResponseEntity
+					.ok()
+					.location(ResponseUtil.resourceUri(contactId))
  					.body(c)
             )
             .orElseThrow(() -> new ResourceNotFoundException(
@@ -68,9 +74,11 @@ public class ContactController {
 	@GetMapping(path = "/contacts/{id}", produces = "application/json")
 	public ResponseEntity<Contact>  findContactById(@PathVariable Integer id) throws Throwable {
 		Optional contactOptional = contactService.getContactById(id);
-		return  (ResponseEntity<Contact>) contactOptional.map(c -> 
-					ResponseEntity.created(ResponseUtil.resourceUri(id))
-					.body(c)
+		return  (ResponseEntity<Contact>) contactOptional.map(c ->
+					ResponseEntity
+							.ok()
+							.location(ResponseUtil.resourceUri(id))
+							.body(c)
 				)
 			.orElseThrow(() -> new ResourceNotFoundException(
 			                "ContactId: " + id + " not found"

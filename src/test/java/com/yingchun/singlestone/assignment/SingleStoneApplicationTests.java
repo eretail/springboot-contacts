@@ -1,11 +1,13 @@
 package com.yingchun.singlestone.assignment;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.yingchun.singlestone.assignment.model.Contact;
+import com.yingchun.singlestone.assignment.repo.ContactRepository;
+import com.yingchun.singlestone.assignment.service.ContactService;
+import org.apache.logging.log4j.core.util.Assert;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,13 +21,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.web.context.WebApplicationContext;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.yingchun.singlestone.assignment.model.Contact;
-import com.yingchun.singlestone.assignment.repo.ContactRepository;
-import com.yingchun.singlestone.assignment.service.ContactService;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
+//import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.post;
 
 @RunWith(SpringRunner.class)
 //@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -33,56 +38,95 @@ import com.yingchun.singlestone.assignment.service.ContactService;
 @AutoConfigureMockMvc
 public class SingleStoneApplicationTests {
 
-	private final String contactJson = "	{\r\n" + 
-			"	   \"phone\": [\r\n" + 
-			"	    {\r\n" + 
-			"	      \"number\": \"302-611-9148\",\r\n" + 
-			"	      \"type\": \"home\"\r\n" + 
-			"	    },\r\n" + 
-			"	    {\r\n" + 
-			"	      \"number\": \"302-532-9427\",\r\n" + 
-			"	      \"type\": \"mobile\"\r\n" + 
-			"	    }\r\n" + 
-			"	  ],\r\n" + 
-			"      \"name\": {\r\n" + 
-			"	    \"first\": \"Yingchun\",\r\n" + 
-			"	    \"middle\": \"Francis\",\r\n" + 
-			"	    \"last\": \"Gilkey\"\r\n" + 
-			"	  },\r\n" + 
-			"	  \"address\": {\r\n" + 
-			"	    \"street\": \"8360 High Autumn Row\",\r\n" + 
-			"	    \"city\": \"Cannon\",\r\n" + 
-			"	    \"state\": \"Delaware\",\r\n" + 
-			"	    \"zip\": \"19797\"\r\n" + 
-			"	  },	 \r\n" + 
-			"	  \"email\": \"harold.gilkey@yahoo.com\"\r\n" + 
-			"	}";
-	
+    private String contactJson = "{" +
+            "\"phone\": [" +
+            "{" +
+            "\"number\": \"302-611-9148\"," +
+            "\"type\": \"home\"" +
+            "}," +
+            "{" +
+            "\"number\": \"302-532-9427\"," +
+            "\"type\": \"mobile\"" +
+            "}" +
+            "]," +
+            "\"name\": {" +
+            "\"first\": \"Yingchun\"," +
+            "\"middle\": \"Francis\"," +
+            "\"last\": \"Gilkey\"" +
+            "}," +
+            "\"address\": {" +
+            "\"street\": \"8360 High Autumn Row\"," +
+            "\"city\": \"Cannon\"," +
+            "\"state\": \"Delaware\"," +
+            "\"zip\": \"19797\"" +
+            "}," +
+            "\"email\": \"harold.gilkey@yahoo.com\"" +
+            "}";
+
+    private String newContactJson = "{" +
+            "\"phone\": [" +
+            "{" +
+            "\"number\": \"302-611-9148\"," +
+            "\"type\": \"home\"" +
+            "}," +
+            "{" +
+            "\"number\": \"302-532-9427\"," +
+            "\"type\": \"mobile\"" +
+            "}" +
+            "]," +
+            "\"name\": {" +
+            "\"first\": \"Harold\"," +
+            "\"middle\": \"Francis\"," +
+            "\"last\": \"Gilkey\"" +
+            "}," +
+            "\"address\": {" +
+            "\"street\": \"8360 High Autumn Row\"," +
+            "\"city\": \"Cannon\"," +
+            "\"state\": \"Delaware\"," +
+            "\"zip\": \"19797\"" +
+            "}," +
+            "\"email\": \"harold.gilkey@yahoo.com\"" +
+            "}";
+
     @Autowired
-    private MockMvc mvc;
-    
+    private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
     @Autowired
     private TestRestTemplate restTemplate;
     
     @Autowired
+//    @MockBean
     private ContactService contactService;
 
     @Autowired
     private ContactRepository contactRepository;
     
     public SingleStoneApplicationTests() {};
+
     @Before(value = "")
     public void setUp() {
-    	for(int i=0;i<5; i++) {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+
+        for(int i=0;i<5; i++) {
 	        Contact contact = createTestContacts(contactJson);        
 	        contactService.addContact(contact);
     	}
     }
-    
-	private Contact createTestContacts(String contactJson) {
-		Gson gson = new Gson();
-		
-		return gson.fromJson(contactJson, Contact.class); 
+
+    private Contact createTestContacts(String jsonString) {
+    	Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Contact contact = null;
+
+        try {
+            contact = new ObjectMapper().readValue(jsonString, Contact.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return contact;
+//		return gson.fromJson(contactJson, Contact.class);
 	}
 	    
     @Test //getContactById
@@ -90,7 +134,6 @@ public class SingleStoneApplicationTests {
       throws Exception {
      
         Contact contact = createTestContacts(contactJson);
-     
         contactService.addContact(contact);
 
         assertThat(((Contact)contactService.findById(1).get()).getContactName().getFirstName().equals("Yingchun"));
@@ -98,37 +141,67 @@ public class SingleStoneApplicationTests {
         assertThat(responseEntity.getBody().getContactName().getFirstName().equals("Yingchun"));
     }
 
-    @Test //getContacts
-    public void givenContact_whenGetContacts_thenStatus200()
+    @Test
+    public void generalApiTest()
       throws Exception {
-    
-    	Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    	HttpHeaders headers = this.restTemplate.getForEntity("/contacts", String.class).getHeaders();
 
-        mvc.perform(get("/contacts")
+        mockMvc.perform(get("/contacts")
           .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andExpect((ResultMatcher) jsonPath("$[0].first", is("Yingchun")));
+          .andExpect(status().isOk());
     }
 
 	@Test //post, save new contact
-	public void saveContactsTest() {
-		Contact newContact = createTestContacts(contactJson);
-	}
+	public void saveContactsTest() throws Exception {
+//		Contact newContact = createTestContacts(contactJson);
 
-	@Test
-	public void updateContactByIdTest() {
-	}
+        /*ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+        String requestJson=ow.writeValueAsString(anObject );*/
 
+         mockMvc.perform(
+                post("/contacts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(newContactJson)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.name.first").value("Harold"))
+                .andExpect(jsonPath("$.name.last").value("Gilkey"));
+    }
 
-	@Test
-	public void deleteContactByIdTest() {
-	}
+	@Test //put update existing contact
+	public void updateContactByIdTest() throws Exception {
+        Contact newContact = createTestContacts(contactJson);
+        newContact = contactService.addContact(newContact);
 
-	
-	@Test
-	public void testRequest() {
-		HttpHeaders headers = this.restTemplate.getForEntity("/contacts", String.class).getHeaders();
-		assertThat(headers.getLocation()).hasHost("127.0.0.1");
-	}
+        mockMvc.perform(
+                put("/contacts/"+newContact.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(newContactJson)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id").exists())
+        .andExpect(jsonPath("$.name.first").value("Harold"))
+        .andExpect(jsonPath("$.name.last").value("Gilkey"));
+    }
+
+	@Test //delete delete contacts
+	public void deleteContactByIdTest() throws Exception {
+        Contact newContact = createTestContacts(contactJson);
+        newContact = contactService.addContact(newContact);
+
+        mockMvc.perform(
+            delete("/contacts/"+newContact.getId())
+        )
+        .andExpect(status().isOk());
+
+        Assert.isEmpty(contactService.getContactById(newContact.getId()));
+    }
 
 }
